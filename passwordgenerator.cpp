@@ -196,27 +196,41 @@ void PasswordGenerator::v_findOutPassword(int minimum, int maximum){
     int numberOfCharacters = QLi_c_charsOfPassword.size();
 
     for (int length=minimum; length<=maximum; length++){
-        unsigned long long int _numberOfPossiblePasswords =
-                static_cast<unsigned long long int>(pow(numberOfCharacters, length));
 
-        for (unsigned long long int n=0; n<_numberOfPossiblePasswords; n++){
-            unsigned long long int aux =n;
+        QList<uint8_t> QLi_control;
+        QLi_control.clear();
+        for(int i=0; i<length; i++){
+            QLi_control.append(0);
+        }
+
+        bool bOk = false;
+
+        int n=0;
+
+        while (!bOk){
+
+            n++;
+
             QString QS_passwordTest = "";
 
-            for (int k=0; k<length; k++){
-                QS_passwordTest.push_front(QLi_c_charsOfPassword.at(aux%numberOfCharacters));
-                aux /= numberOfCharacters;
+            for(int i=0; i<length; i++){
+                QS_passwordTest.append(
+                            QLi_c_charsOfPassword.at(
+                                QLi_control.at(i)));
             }
+
             if(QLi_QS_passwords_interface_2.size() < 20)
                 QLi_QS_passwords_interface_2.append(QS_passwordTest);
 
-            if(n%10000 == 9999){
+            if(n >=10000){
                 ui->QLW_listOfPasswords_2->clear();
                 ui->QLW_listOfPasswords_2->addItems(QLi_QS_passwords_interface_2);
 
-                this->repaint();
                 qApp->processEvents();
+                this->repaint();
+
                 QLi_QS_passwords_interface_2.clear();
+                n=0;
             }
 
             if(QS_passwordTest == QS_password){
@@ -277,10 +291,6 @@ void PasswordGenerator::v_findOutPassword(int minimum, int maximum){
                             "Time of process: "+ QString::number(time_day) +" days "+ QString::number(time_h)+ " h";
 
                 }
-
-
-
-
                 ui->QLE_passwordResult->setText(QS_passwordTest);
 
                 ui->QLW_listOfPasswords_2->clear();
@@ -290,11 +300,25 @@ void PasswordGenerator::v_findOutPassword(int minimum, int maximum){
                 ui->QLW_listOfPasswords_2->addItem("Time of Process: ");
                 ui->QLW_listOfPasswords_2->addItem(QS_timeOfProcess);
 
-
                 return;
             }
-        }
+            for (int i=length-1; i>=0; i--){
 
+                uint8_t n = QLi_control.at(i);
+
+                if(n == numberOfCharacters-1){
+                    if(i==0)
+                        bOk = true;
+                    else {
+                        QLi_control.replace(i, 0);
+                    }
+                }
+                else{
+                    QLi_control.replace(i, n+1);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -380,48 +404,112 @@ void PasswordGenerator::SLOT_createStatics(){
 
 void PasswordGenerator::v_generateStatics(int minimum, int maximum){
 
+
     QET_control.start();
+
+    number numberOfPossiblePasswords;
 
     int numberOfCharacters = QLi_c_charsOfPassword.size();
 
-
-    long double numberOfPossiblePasswords = 0;
-
-    for (int length_=minimum; length_<=maximum; length_++){
-        numberOfPossiblePasswords += pow(numberOfCharacters, length_);
+    for (int length=minimum; length<=maximum; length++){
+        numberOfPossiblePasswords.value += pow(numberOfCharacters, length);
     }
 
-    for (double n=0; n<10000; n++){
+    {
+        bool b_aux = false;
 
-        double aux =n;
+        while(!b_aux){
+
+            if(numberOfPossiblePasswords.value >= 0 &&
+               numberOfPossiblePasswords.value < 1000){
+                b_aux = true;
+            }
+            else{
+                numberOfPossiblePasswords.value /= pow(10, 3);
+                numberOfPossiblePasswords.power += 3;
+            }
+
+        }
+    }
+
+
+    QLi_QS_passwords_interface_2.clear();
+
+    int length = maximum;
+
+    QList<uint8_t> QLi_control;
+    QLi_control.clear();
+    for(int i=0; i<length; i++){
+        QLi_control.append(0);
+    }
+
+    bool bOk = false;
+
+    int n = 0;
+    int k = 0;
+
+    while (!bOk && k <=30*10000){
+
+        n++;
+        k++;
 
         QString QS_passwordTest = "";
 
-        for (int k=0; k<maximum; k++){
-            QS_passwordTest.push_front(QLi_c_charsOfPassword.at(static_cast<int>(aux)%numberOfCharacters));
-            aux /= numberOfCharacters;
+        for(int i=0; i<length; i++){
+            QS_passwordTest.append(
+                        QLi_c_charsOfPassword.at(
+                            QLi_control.at(i)));
         }
+
         if(QLi_QS_passwords_interface_2.size() < 20)
             QLi_QS_passwords_interface_2.append(QS_passwordTest);
 
-        if(static_cast<int>(n)%10000 == 9999){
+        if(n >=10000){
             ui->QLW_listOfPasswords_2->clear();
             ui->QLW_listOfPasswords_2->addItems(QLi_QS_passwords_interface_2);
 
-            this->repaint();
             qApp->processEvents();
+            this->repaint();
+
             QLi_QS_passwords_interface_2.clear();
+            n=0;
         }
 
+        if(QS_passwordTest == QS_password)
+            break;
+
+        for (int i=length-1; i>=0; i--){
+
+            uint8_t n = QLi_control.at(i);
+
+            if(n == numberOfCharacters-1){
+                if(i==0)
+                    bOk = true;
+                else {
+                    QLi_control.replace(i, 0);
+                }
+            }
+            else{
+                QLi_control.replace(i, n+1);
+                break;
+            }
+        }
     }
 
-    double timeEstimeted = QET_control.nsecsElapsed()*numberOfPossiblePasswords/10000;
-
-
     QString QS_numberOfCharacters = "number of Characters: "+ QString::number(numberOfCharacters),
+
             QS_numberOfPossiblePasswords =
-            "number of Possible Passwords" + QString::number(numberOfPossiblePasswords, 'e', 3),
+            "number of Possible Passwords: " +
+            QString::number(numberOfPossiblePasswords.value, 'f', 3) + " E" +
+            QString::number(numberOfPossiblePasswords.power),
+
             QS_timeEstimeted = "";
+
+
+    double timeEstimeted = QET_control.nsecsElapsed()*
+            numberOfPossiblePasswords.value*
+            pow(10, numberOfPossiblePasswords.power)/
+            k;
 
 
     if(timeEstimeted < 1e3){ /// ns

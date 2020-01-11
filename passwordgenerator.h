@@ -9,13 +9,26 @@
 #include <QElapsedTimer>
 #include <QApplication>
 
+#include "stdlib.h"
+
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class PasswordGenerator; }
 QT_END_NAMESPACE
 
+struct number{
+
+    int power = 0;
+
+    double value = 0;
+};
+
+
 class PasswordGenerator : public QMainWindow
 {
     Q_OBJECT
+
 
 public:
     PasswordGenerator(QWidget *parent = nullptr);
@@ -70,6 +83,7 @@ private:
     QString QS_password;
 
     QList<QString> QLi_QS_passwords_interface_2;
+
 
 };
 #endif // PASSWORDGENERATOR_H

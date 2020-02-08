@@ -90,10 +90,10 @@ void PasswordGenerator::v_generatePasswords(int minimum, int maximum, int number
     int numberOfCharacters = QLi_c_charsOfPassword.size();
 
     for (int i=0; i<numberOfPasswords; i++){
-        int length = QRandomGenerator::global()->bounded(minimum, (maximum+1));
+        int length = QRandomGenerator::global()->bounded(minimum, (maximum+1));        
         QString QS_password;
         QS_password.clear();
-        for(int j=0; j<=length; j++){
+        for(int j=0; j<length; j++){
             QS_password.append(
                         QLi_c_charsOfPassword.at(
                             QRandomGenerator::global()->bounded(0, numberOfCharacters)

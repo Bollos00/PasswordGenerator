@@ -1,5 +1,3 @@
 # PasswordGenerator
 
-This is a simple password generator created using QtCreator.
-
-By Bollos.
+A simple password generator created with QtCreator.
